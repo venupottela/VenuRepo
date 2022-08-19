@@ -28,6 +28,8 @@ public class Employee {
 
 	private String fileName;
 	private String type;
+	
+
 
 	public long getId() {
 		return id;
@@ -101,10 +103,8 @@ public class Employee {
 		this.type = type;
 	}
 
-	/*
-	 * public Employee(long id, String fileName,byte[] image) { super(); this.id =
-	 * id; this.fileName = fileName; this.image = image; }
-	 */
+	
+	
 
 	
 	

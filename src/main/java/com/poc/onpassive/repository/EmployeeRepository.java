@@ -2,6 +2,7 @@ package com.poc.onpassive.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,5 +21,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 //	public Employee save1(MultipartFile file, Long id);
 
 	public Employee save1(Employee employee, MultipartFile file);
+
+
+	
+	
+
+	 
 
 }

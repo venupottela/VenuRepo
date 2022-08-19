@@ -7,7 +7,9 @@ import java.util.Optional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.poc.onpassive.entity.Employee;
+import com.poc.onpassive.entity.Sendmail;
 import com.poc.onpassive.exception.ResourceNotFoundException;
+import com.poc.onpassive.model.Mail;
 
 public interface EmployeeService {
 
@@ -15,7 +17,7 @@ public interface EmployeeService {
 
 	public List<Employee> viewEmployee();
 
-	public Optional<Employee> viewEmployeebyid(Long id);
+	public Employee viewEmployeebyid(Long id);
 
 	public Employee viewByMail(String mail);
 
@@ -34,6 +36,12 @@ public interface EmployeeService {
 	public Employee updateData(Employee employee,long id);
 
 	Employee uploadImage(MultipartFile file, Employee employee) throws IOException;
+
+	public void mailsend(Sendmail mail);
+
+	
+
+	
 
 
 }

@@ -1,35 +1,39 @@
 package com.poc.onpassive.services;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.poc.onpassive.entity.Employee;
+import com.poc.onpassive.entity.Sendmail;
 import com.poc.onpassive.exception.ResourceNotFoundException;
 import com.poc.onpassive.repository.EmployeeRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Transactional
 @Service
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
 	@Autowired
 	private EmployeeRepository employeeRepository;
 
+	@Autowired
+	private JavaMailSender javaMailSender;
+
 	public Employee upload(Employee employee, MultipartFile file) throws IOException {
+		log.info("employee service impl started");
 		String fileName = StringUtils(file.getOriginalFilename());
 		// Employee FileDB = new Employee(file.getBytes());
+		log.info("employee service impl ended");
 		return employeeRepository.save1(employee, file);
 
 	}
@@ -46,11 +50,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 	}
 
 	@Override
-	public Optional<Employee> viewEmployeebyid(Long id) {
+	public Employee viewEmployeebyid(Long id) {
 		System.out.println("EmployeeServiceImpl.viewEmployeebyid()" + id);
 
-		Optional<Employee> view = employeeRepository.findById(id);
-		return view;
+		return employeeRepository.findById(id).get();
 
 	}
 
@@ -158,32 +161,81 @@ public class EmployeeServiceImpl implements EmployeeService {
 	 */
 
 	public Employee uploadImage(MultipartFile file, Employee emp) throws IOException {
-
-		/*
-		 * emp.setFileName(emp.getFirstName()); emp.setLastName(emp.getLastName());
-		 * emp.setEmailId(emp.getEmailId()); emp.setAddress(emp.getAddress());
-		 * emp.setMobileno(emp.getMobileno());
-		 */
+		log.info("upload image setvice started");
 		emp.setFileName(file.getOriginalFilename());
 		emp.setImage(file.getBytes());
 		String originalFilename = file.getOriginalFilename();
 		String[] split = originalFilename.split("\\.");
 		emp.setType(split[split.length - 1]);
-
+		log.info("upload image setvice ended");
 		return employeeRepository.save(emp);
+	}
+
+	/*
+	 * @Override public void mailsend(Mail mail) {
+	 * 
+	 * System.out.println("EmployeeServiceImpl.mailsend()"); StringBuilder sb = new
+	 * StringBuilder();
+	 * sb.append("Name: ").append(mail.getName()).append(System.lineSeparator());
+	 * sb.append("\n Message: ").append(mail.getMessage());
+	 * 
+	 * SimpleMailMessage mail1 = new SimpleMailMessage();
+	 * 
+	 * mail1.setTo(mail.getEmail()); mail1.setFrom("gvenu350@gmail.com");
+	 * mail1.setSubject(mail.getMessage()); mail1.setText(sb.toString());
+	 * 
+	 * employeeRepository.send(mail1);
+	 * 
+	 * }
+	 */
+	@Override
+	public void mailsend(Sendmail mail) {
+		try {
+			System.out.println("Mail sending is started");
+			SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+			simpleMailMessage.setFrom("kameshkumarbysani95@gmail.com");
+			simpleMailMessage.setTo(mail.getTo());
+			simpleMailMessage.setSubject(mail.getTopic());
+			simpleMailMessage.setText(mail.getTextBody());
+			javaMailSender.send(simpleMailMessage);
+			System.out.println("Mail sending is completed");
+		} catch (Exception e) {
+			System.out.println("Error occured: " + e.getMessage());
+		}
 
 	}
 
-//	@Override
-//	public Employee uploadImage(MultipartFile file,long id) throws IOException {
-//		Employee emp = new Employee();
-//		emp.setId(id);
-//		emp.setFileName(file.getOriginalFilename());
-//		emp.setImage(file.getBytes());
-//		return employeeRepository.save(emp);
-//		
-//		
-//		
-//	}
+	// @Override
+	// public Employee uploadImage(MultipartFile file,long id) throws IOException {
+	// Employee emp = new Employee();
+	// emp.setId(id);
+	// emp.setFileName(file.getOriginalFilename());
+	// emp.setImage(file.getBytes());
+	// return employeeRepository.save(emp);
+	//
+	//
+	//
+	// }
+
+	/*
+	 * @Override public void mailsend(Sendmail sendmail, String to) {
+	 * System.out.println("EmployeeServiceImpl.mailsend()");
+	 * 
+	 * try { System.out.println("Mail sending is started"); SimpleMailMessage
+	 * simpleMailMessage = new SimpleMailMessage();
+	 * simpleMailMessage.setTo(sendmail.getTo());
+	 * simpleMailMessage.setSubject(sendmail.getTextBody());
+	 * simpleMailMessage.setText(sendmail.getTopic());
+	 * simpleMailMessage.setFrom(sendmail.getSetFrom());
+	 * 
+	 * 
+	 * simpleMailMessage.setFrom("gvenu350@gmail.com"); simpleMailMessage.setTo(to);
+	 * simpleMailMessage.setSubject(to); simpleMailMessage.setText(to);
+	 * 
+	 * 
+	 * employeeRepository.send(simpleMailMessage);
+	 * System.out.println("Mail sending is completed"); }catch (Exception e){
+	 * System.out.println("Error occured: "+e.getMessage()); }
+	 */
 
 }

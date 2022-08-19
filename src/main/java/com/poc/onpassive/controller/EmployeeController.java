@@ -5,7 +5,6 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +20,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.poc.onpassive.entity.Employee;
+import com.poc.onpassive.entity.Sendmail;
 import com.poc.onpassive.exception.ResourceNotFoundException;
+import com.poc.onpassive.model.Mail;
 import com.poc.onpassive.model.ResponseData;
 import com.poc.onpassive.services.EmployeeService;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
+@Slf4j
 public class EmployeeController {
 
 	@Autowired
@@ -38,13 +42,14 @@ public class EmployeeController {
 	@PostMapping("/employee")
 	public ResponseEntity<ResponseData> createEmployee(@RequestParam("data") String data,
 			@RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
+		log.info("employee singn up started");
 
 		List<Employee> list = new ArrayList<>();
 		Employee employee = new ObjectMapper().readValue(data, Employee.class);
 
 		Employee save = employeeService.upload(employee, file);
 		list.add(save);
-
+		log.info("employee singn up ended");
 		if (Boolean.TRUE.equals(save != null)) {
 			return ResponseEntity.ok(
 					new ResponseData(HttpURLConnection.HTTP_CREATED, "success", "EMPLOYEE CREATED SUCCESSFULLU", list));
@@ -82,10 +87,19 @@ public class EmployeeController {
 	}
 
 	@GetMapping("/viewbyid/{id}")
-	public Optional<Employee> view(@PathVariable("id") Long id) {
+	public ResponseEntity<ResponseData> view(@PathVariable("id") Long id) {
+		// List<Employee> al = new ArrayList<>();
 		System.err.println("employee controller by id" + id);
-		Optional<Employee> viewEmployeebyid = employeeService.viewEmployeebyid(id);
-		return viewEmployeebyid;
+		Employee viewEmployeebyid = employeeService.viewEmployeebyid(id);
+		// al.add(viewEmployeebyid.get().getId());
+		if (viewEmployeebyid.getId() != 0) {
+			return ResponseEntity.ok(new ResponseData(HttpURLConnection.HTTP_CREATED, "SUCCESS",
+					"EMPLOYEE DETAILS  CREATED SUCCESSFULLY"));
+
+		} else {
+			return ResponseEntity
+					.ok(new ResponseData(HttpURLConnection.HTTP_NOT_FOUND, "FAILED", "EMPLOYEE DETAILS NOT CREATED"));
+		}
 	}
 
 	@GetMapping("/viewbymail/{mail}")
@@ -116,7 +130,7 @@ public class EmployeeController {
 		return "Deleted Successfully";
 	}
 
-	@PostMapping("/employeedetais")
+	@PostMapping("/employeedetails")
 	public ResponseEntity<ResponseData> createEmployeeData(@RequestBody Employee employee) {
 		System.out.println("createEmployeeData in controller");
 		List<Employee> list = new ArrayList<>();
@@ -196,9 +210,10 @@ public class EmployeeController {
 	@PostMapping("/uploadImage")
 	public ResponseEntity<ResponseData> uploadFile(@RequestParam("file") MultipartFile file,
 			@RequestParam("data") String data) throws IOException {
+		log.info("upload image started");
 		Employee employee = new ObjectMapper().readValue(data, Employee.class);
 		Employee uploadImage = employeeService.uploadImage(file, employee);
-
+		log.info("upload image ended");
 		if (uploadImage != null) {
 			return ResponseEntity
 					.ok(new ResponseData(HttpURLConnection.HTTP_CREATED, "success", "view all employee details"));
@@ -208,4 +223,12 @@ public class EmployeeController {
 		}
 
 	}
+	
+	//@post(value = "/mail/send/", method = RequestMethod.POST)
+	
+	@PostMapping("/sendmail")
+    public void sendMail(@RequestBody Sendmail mail) {
+		System.out.println("EmployeeController.sendMail()");
+		employeeService.mailsend(mail);
+    }
 }
